@@ -26,7 +26,7 @@ const toStr = buffer => decoder.decode(buffer);
 
 const writeInt16BE = (buffer, offset, value) => { // 2 bytes
   if (value < -32768 || value > 32767 || Math.floor(value) !== value) {
-    throw Error('writeUInt16BE: Must be integer between 0-32767');
+    throw Error('writeUInt16BE : Must be integer between 0-32767');
   }
   buffer[offset] = value >> 8;
   buffer[offset + 1] = value & 0xff;
@@ -38,7 +38,7 @@ const readInt16BE = (buffer, offset) => { // 2 bytes
 };
 const writeUInt16BE = (buffer, offset, value) => { // 2 bytes
   if (value < 0 || value > 65535 || Math.floor(value) !== value) {
-    throw Error('writeUInt16BE: Must be integer between 0-65535');
+    throw Error('writeUInt16BE : Must be integer between 0-65535');
   }
   buffer[offset] = value >> 8;
   buffer[offset + 1] = value & 0xff;
@@ -51,9 +51,12 @@ const decoded = readInt16BE(encoded, 0);
 console.log({ encoded, decoded });
 
 const hd = new Array(255); // pre-computed string equivalents
+const rhd = {}; // reversed pre-computed string equivalents
 const h = '0123456789abcdef'; // lowercase hex characters
 for (let i = 0, l = 255; i < l; i += 1) {
-  hd[i] = h[i >> 4] + h[i & 15];
+  const str = h[i >> 4] + h[i & 15];
+  hd[i] = str;
+  rhd[str] = i;
 }
 const toHex = (buffer) => {
   let string = '';
@@ -62,7 +65,25 @@ const toHex = (buffer) => {
   }
   return string;
 };
+const fromHex = (string) => {
+  const length = string.length / 2;
+  if (length % 2 !== 0) {
+    throw Error('fromHex : Invalid string length');
+  }
+  const buffer = new Uint8Array(length);
+  for (let i = 0, l = string.length; i < l; i += 2) {
+    const segment = string.substring(i, i + 2);
+    if (rhd[segment] === undefined) {
+      throw Error('fromHex : Invalid string segment');
+    }
+    buffer[i === 0 ? 0 : i / 2] = rhd[segment];
+  }
+  return buffer;
+};
 
 const encoded2 = concat(fromStr('fak'), fromStr('yeh'), fromStr('fak'), fromStr('yeh'));
+console.log(encoded2);
 console.log(toHex(encoded2));
 console.log(toStr(encoded2));
+console.log(fromHex(toHex(encoded2)));
+console.log(toStr(fromHex(toHex(encoded2))));
