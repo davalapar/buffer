@@ -46,6 +46,23 @@ const writeUInt16BE = (buffer, offset, value) => { // 2 bytes
 };
 const readUInt16BE = (buffer, offset) => (buffer[offset] << 8) | buffer[offset + 1]; // 2 bytes
 
-const encoded = writeInt16BE(new Uint8Array(4), 0, -32768);
+const encoded = writeInt16BE(new Uint8Array(2), 0, -32768);
 const decoded = readInt16BE(encoded, 0);
 console.log({ encoded, decoded });
+
+const hd = new Array(255); // pre-computed string equivalents
+const h = '0123456789abcdef'; // lowercase hex characters
+for (let i = 0, l = 255; i < l; i += 1) {
+  hd[i] = h[i >> 4] + h[i & 15];
+}
+const toHex = (buffer) => {
+  let string = '';
+  for (let i = 0, l = buffer.length; i < l; i += 1) {
+    string += hd[buffer[i]];
+  }
+  return string;
+};
+
+const encoded2 = concat(fromStr('fak'), fromStr('yeh'), fromStr('fak'), fromStr('yeh'));
+console.log(toHex(encoded2));
+console.log(toStr(encoded2));
