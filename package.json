@@ -1,0 +1,9 @@
+{
+  "name": "buffer",
+  "version": "0.0.1",
+  "description": "uint8array buffer",
+  "main": "index.js",
+  "repository": "https://github.com/davalapar/buffer",
+  "author": "davalapar <davalapar@gmail.com>",
+  "license": "MIT"
+}
