@@ -89,7 +89,7 @@ const write = {
 const read = {
   Int16BE: (buffer, offset) => { // 2 bytes
     const value = buffer[offset + 1] | (buffer[offset] << 8);
-    return value & 0x8000 ? value | 0xFFFF0000 : value;
+    return value & 32768 ? value | 4294901760 : value;
   },
   UInt16BE: (buffer, offset) => (buffer[offset] << 8)
     | buffer[offset + 1],
