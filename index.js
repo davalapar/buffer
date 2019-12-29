@@ -1,5 +1,29 @@
 /* eslint-disable no-bitwise, no-param-reassign, no-console */
 
+const isNumber = value => typeof value === 'number'
+  && Number.isNaN(value) === false
+  && Number.isFinite(value) === true;
+
+const isInteger = Number.isInteger
+  ? value => typeof value === 'number'
+    && Number.isNaN(value) === false
+    && Number.isFinite(value) === true
+    && Number.isInteger(value) === true
+  : value => typeof value === 'number'
+    && Number.isNaN(value) === false
+    && Number.isFinite(value) === true
+    && Math.floor(value) === value;
+
+const isFloat = value => typeof value === 'number'
+  && Number.isNaN(value) === false
+  && Number.isFinite(value) === true
+  && Math.fround(value) === value;
+
+const isDouble = value => typeof value === 'number'
+  && Number.isNaN(value) === false
+  && Number.isFinite(value) === true
+  && Math.fround(value) !== value;
+
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
@@ -24,30 +48,63 @@ const toStr = buffer => decoder.decode(buffer);
 // console.log(concat(fromStr('fak'), fromStr('yeh'), fromStr('fak'), fromStr('yeh')));
 // console.log(toStr(concat(fromStr('fak'), fromStr('yeh'), fromStr('fak'), fromStr('yeh'))));
 
-const writeInt16BE = (buffer, offset, value) => { // 2 bytes
-  if (value < -32768 || value > 32767 || Math.floor(value) !== value) {
-    throw Error('writeUInt16BE : Must be integer between 0-32767');
-  }
-  buffer[offset] = value >> 8;
-  buffer[offset + 1] = value & 0xff;
-  return buffer;
+const write = {
+  Int16BE: (buffer, offset, value) => { // 2 bytes
+    if (value < -32768 || value > 32767 || Math.floor(value) !== value) {
+      throw Error('write.Int16BE : Must be an integer between -32768 and +32767');
+    }
+    buffer[offset] = value >> 8;
+    buffer[offset + 1] = value & 255;
+    return buffer;
+  },
+  UInt16BE: (buffer, offset, value) => { // 2 bytes
+    if (value < 0 || value > 65535 || Math.floor(value) !== value) {
+      throw Error('write.UInt16BE : Must be an integer between 0 and 65535');
+    }
+    buffer[offset] = value >> 8;
+    buffer[offset + 1] = value & 255;
+    return buffer;
+  },
+  Int32BE: (buffer, offset, value) => { // 4 bytes
+    if (value < -2147483648 || value > 2147483647 || Math.floor(value) !== value) {
+      throw Error('write.Int32BE : Must be an integer between -2147483648 and +2147483647');
+    }
+    buffer[offset] = value >> 24;
+    buffer[offset + 1] = value >> 16;
+    buffer[offset + 2] = value >> 8;
+    buffer[offset + 3] = value & 255;
+    return buffer;
+  },
+  UInt32BE: (buffer, offset, value) => { // 4 bytes
+    if (value < 0 || value > 4294967295 || Math.floor(value) !== value) {
+      throw Error('write.UInt32BE : Must be an integer between 0 and +4294967295');
+    }
+    buffer[offset] = value >> 24;
+    buffer[offset + 1] = value >> 16;
+    buffer[offset + 2] = value >> 8;
+    buffer[offset + 3] = value & 255;
+    return buffer;
+  },
 };
-const readInt16BE = (buffer, offset) => { // 2 bytes
-  const value = buffer[offset + 1] | (buffer[offset] << 8);
-  return value & 0x8000 ? value | 0xFFFF0000 : value;
+const read = {
+  Int16BE: (buffer, offset) => { // 2 bytes
+    const value = buffer[offset + 1] | (buffer[offset] << 8);
+    return value & 0x8000 ? value | 0xFFFF0000 : value;
+  },
+  UInt16BE: (buffer, offset) => (buffer[offset] << 8)
+    | buffer[offset + 1],
+  Int32BE: (buffer, offset) => (buffer[offset] << 24)
+    | (buffer[offset + 1] << 16)
+    | (buffer[offset + 2] << 8)
+    | (buffer[offset + 3]),
+  UInt32BE: (buffer, offset) => (buffer[offset] * 16777216)
+    + ((buffer[offset + 1] << 16)
+    | (buffer[offset + 2] << 8)
+    | buffer[offset + 3]),
 };
-const writeUInt16BE = (buffer, offset, value) => { // 2 bytes
-  if (value < 0 || value > 65535 || Math.floor(value) !== value) {
-    throw Error('writeUInt16BE : Must be integer between 0-65535');
-  }
-  buffer[offset] = value >> 8;
-  buffer[offset + 1] = value & 0xff;
-  return buffer;
-};
-const readUInt16BE = (buffer, offset) => (buffer[offset] << 8) | buffer[offset + 1]; // 2 bytes
 
-const encoded = writeInt16BE(new Uint8Array(2), 0, -32768);
-const decoded = readInt16BE(encoded, 0);
+const encoded = write.UInt32BE(new Uint8Array(4), 0, 4294967295);
+const decoded = read.UInt32BE(encoded, 0);
 console.log({ encoded, decoded });
 
 const hd = new Array(255); // pre-computed string equivalents
