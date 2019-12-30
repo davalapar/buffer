@@ -1,36 +1,5 @@
 /* eslint-disable no-bitwise, no-param-reassign, no-console */
 
-const isNumber = value => typeof value === 'number'
-  && Number.isNaN(value) === false
-  && Number.isFinite(value) === true;
-
-const isInteger = Number.isInteger
-  ? value => typeof value === 'number'
-    && Number.isNaN(value) === false
-    && Number.isFinite(value) === true
-    && Number.isInteger(value) === true
-  : value => typeof value === 'number'
-    && Number.isNaN(value) === false
-    && Number.isFinite(value) === true
-    && Math.floor(value) === value;
-
-const isFloat = value => typeof value === 'number'
-  && Number.isNaN(value) === false
-  && Number.isFinite(value) === true
-  && Math.fround(value) === value;
-
-const isDouble = value => typeof value === 'number'
-  && Number.isNaN(value) === false
-  && Number.isFinite(value) === true
-  && Math.fround(value) !== value;
-
-const checks = {
-  isNumber,
-  isInteger,
-  isFloat,
-  isDouble,
-};
-
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
